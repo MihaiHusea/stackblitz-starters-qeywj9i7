@@ -6,6 +6,7 @@ import { Cart } from './pages/Cart';
 import { Products } from './pages/Products';
 import { Product } from './pages/Product';
 import { Header } from './components/Header';
+import { Favorites, Wishlist } from './pages/Favorites';
 // Importam elementele necesare
 import { useReducer } from 'react';
 import { initialState, cartReducer } from './store/Cart/reducer';
@@ -15,6 +16,11 @@ import {
   themeReducer,
 } from './store/Theme/reducer';
 import { ThemeContext } from './store/Theme/context';
+import { FavoritesContext } from './store/Favorites/context';
+import {
+  initialState as favoritesInitialState,
+  favoritesReducer,
+} from './store/Favorites/reducer';
 
 const router = createBrowserRouter([
   {
@@ -53,6 +59,15 @@ const router = createBrowserRouter([
       </>
     ),
   },
+  {
+    path: '/favorites',
+    element: (
+      <>
+        <Header />
+        <Favorites />
+      </>
+    ),
+  },
 ]);
 
 export default function App() {
@@ -62,6 +77,10 @@ export default function App() {
   const [themeState, themeDispatch] = useReducer(
     themeReducer,
     themeInitialState
+  );
+  const [favoritesState, favoritesDispatch] = useReducer(
+    favoritesReducer,
+    favoritesInitialState
   );
   // Cream valoarea pe care o vom pasa lui CartContext.Provider.
   const cartContextValue = {
@@ -73,14 +92,21 @@ export default function App() {
     themeState,
     themeDispatch,
   };
+  const favoritesContextValue = {
+    state: favoritesState,
+    dispatch: favoritesDispatch,
+  };
 
   return (
     // Facem dissponibile catre intreaga aplicatie state-urile globale, precum si functiile ce modifica state-urile globale.
+
     <CartContext.Provider value={cartContextValue}>
       <ThemeContext.Provider value={themeContextValue}>
-        <div className="App primary">
-          <RouterProvider router={router} />
-        </div>
+        <FavoritesContext.Provider value={favoritesContextValue}>
+          <div className="App primary">
+            <RouterProvider router={router} />
+          </div>
+        </FavoritesContext.Provider>
       </ThemeContext.Provider>
     </CartContext.Provider>
   );

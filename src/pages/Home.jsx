@@ -7,12 +7,15 @@ import { CartContext } from '../store/Cart/context';
 import { addToCart } from '../store/Cart/actions';
 import { ThemeContext } from '../store/Theme/context';
 import { setLightTheme, setDarkTheme } from '../store/Theme/actions';
+import { addToFavorites } from '../store/Favorites/actions';
+import { FavoritesContext } from '../store/Favorites/context';
 
 export function Home() {
   // Vom modifica state-ul cart-ului, deci avem nevoie de dispatch.
   const { dispatch } = useContext(CartContext);
   // Vom accesa si modifica state-ul temei, deci avem nevoie si de state si de dispatch.
   const { themeState, themeDispatch } = useContext(ThemeContext);
+  const { dispatch: favoritesDispatch } = useContext(FavoritesContext);
   const [products, setProducts] = useState([]);
   useEffect(() => {
     fetch('https://www.cheapshark.com/api/1.0/deals?pageSize=4')
@@ -45,6 +48,12 @@ export function Home() {
     // Trimitem rezultatul actiunii catre reducer.
     dispatch(actionResult);
   }
+  function handleAddToFavorites(product) {
+    // Apelam actiunea, cu payload-ul aferent.
+    const actionResult = addToFavorites(product);
+    // Trimitem rezultatul actiunii catre reducer.
+    favoritesDispatch(actionResult);
+  }
 
   return (
     <div
@@ -58,7 +67,7 @@ export function Home() {
           // Atasam functia care va schimba state-ul global al temei.
           onClick={handleThemeChange}
         >
-          Change theme
+          Schimbă tema
         </Button>
         {/* Afisam produsele din cart. */}
         {products.map((product) => {
@@ -80,6 +89,7 @@ export function Home() {
                   </Card.Text>
                 </Card.Body>
               </Link>
+
               <Button
                 variant="success"
                 onClick={() => {
@@ -93,6 +103,20 @@ export function Home() {
                 }}
               >
                 Adaugă în coș
+              </Button>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  // Construim payload-ul si il pasam ca argument functiei care va apela actiunea addToCart.
+                  handleAddToFavorites({
+                    id: product.dealID,
+                    image: product.thumb,
+                    name: product.title,
+                    price: product.salePrice,
+                  });
+                }}
+              >
+                Adaugă la favorite
               </Button>
             </Card>
           );
